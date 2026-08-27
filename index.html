@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autodiagnóstico Energético y de Seguridad Eléctrica | Gestión Energética</title>
+<style>
+  /* ============================================================
+     PALETA DE MARCA — reemplazar por los colores/logo reales de
+     "Gestión Energética". Todo el theming vive en estas variables.
+     ============================================================ */
+  :root {
+    --color-primary: #0b3159;      /* azul profundo — energía/confianza */
+    --color-primary-dark: #072342;
+    --color-accent: #f2a71b;       /* ámbar — electricidad */
+    --color-accent-dark: #cf8a0d;
+    --color-bg: #f4f6f8;
+    --color-card: #ffffff;
+    --color-text: #1c2733;
+    --color-text-light: #5b6b7a;
+    --color-danger: #c0392b;
+    --color-ok: #1f8a4c;
+    --radius: 12px;
+    --shadow: 0 4px 18px rgba(11, 49, 89, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+  }
+
+  header.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 4px 26px;
+  }
+
+  header.brand .logo-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    font-weight: 800;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  header.brand .brand-name {
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--color-primary);
+  }
+
+  header.brand .brand-sub {
+    font-size: 12px;
+    color: var(--color-text-light);
+  }
+
+  .card {
+    background: var(--color-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 24px;
+  }
+
+  h1 {
+    font-size: 22px;
+    color: var(--color-primary);
+    margin: 0 0 10px;
+  }
+
+  h2 {
+    font-size: 18px;
+    color: var(--color-primary);
+    margin: 0 0 4px;
+  }
+
+  p.lead {
+    color: var(--color-text-light);
+    margin: 0 0 20px;
+    font-size: 14.5px;
+  }
+
+  .progress-track {
+    height: 6px;
+    background: #e6ebf0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--color-accent);
+    width: 0%;
+    transition: width .3s ease;
+  }
+
+  .step-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--color-accent-dark);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 18px;
+  }
+
+  legend {
+    font-weight: 600;
+    font-size: 14.5px;
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  label.field-label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d4dbe2;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--color-text);
+    margin-bottom: 16px;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(11,49,89,0.12);
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .opt {
+    flex: 1 1 auto;
+    min-width: 92px;
+  }
+
+  .opt input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .opt label {
+    display: block;
+    text-align: center;
+    padding: 10px 10px;
+    border: 1.5px solid #d4dbe2;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+
+  .opt input:checked + label {
+    border-color: var(--color-primary);
+    background: rgba(11,49,89,0.06);
+    color: var(--color-primary);
+  }
+
+  .opt input:focus-visible + label {
+    outline: 2px solid var(--color-accent);
+  }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 26px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 13px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s, transform .05s;
+  }
+
+  button:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+    margin-left: auto;
+  }
+
+  .btn-primary:hover { background: var(--color-primary-dark); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--color-text-light);
+  }
+
+  .btn-primary:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
+  .consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: #f4f6f8;
+    border-radius: 8px;
+    padding: 14px;
+    margin: 4px 0 20px;
+    font-size: 12.5px;
+    color: var(--color-text-light);
+  }
+
+  .consent input { margin-top: 3px; flex-shrink: 0; }
+
+  .error-msg {
+    color: var(--color-danger);
+    font-size: 13px;
+    margin: -10px 0 14px;
+    display: none;
+  }
+
+  .hidden { display: none !important; }
+
+  .confirm-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(31,138,76,0.12);
+    color: var(--color-ok);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 18px;
+  }
+
+  .confirm-icon.err {
+    background: rgba(192,57,43,0.12);
+    color: var(--color-danger);
+  }
+
+  .center { text-align: center; }
+
+  footer.foot {
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-text-light);
+    margin-top: 26px;
+  }
+
+  .badge-list {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin: 18px 0 6px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--color-text-light);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="brand">
+    <div class="logo-mark">GE</div>
+    <div>
+      <div class="brand-name">Gestión Energética</div>
+      <div class="brand-sub">Seguridad eléctrica &amp; eficiencia energética · Entre Ríos, Corrientes y Santa Fe</div>
+    </div>
+  </header>
+
+  <div class="card">
+
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <form id="diagForm" novalidate>
+
+      <!-- PASO 0: Intro -->
+      <section class="step" data-step="0">
+        <div class="step-label">Autodiagnóstico gratuito</div>
+        <h1>¿Cuánta energía y qué riesgos eléctricos podría estar teniendo tu empresa?</h1>
+        <p class="lead">
+          Respondé 15 preguntas (~4 minutos) sobre seguridad eléctrica y eficiencia energética
+          de tu establecimiento. Te enviamos por email un informe personalizado con tu nivel
+          de madurez y las oportunidades de mejora más relevantes para tu caso.
+        </p>
+        <div class="nav-buttons">
+          <span></span>
+          <button type="button" class="btn-primary" data-next>Empezar diagnóstico</button>
+        </div>
+      </section>
+
+      <!-- PASO 1: Datos generales -->
+      <section class="step hidden" data-step="1">
+        <div class="step-label">Paso 1 de 4 · Tu empresa</div>
+        <h2>Contanos sobre tu establecimiento</h2>
+        <p class="lead">Esto nos ayuda a comparar tu situación con la de empresas similares.</p>
+
+        <label class="field-label" for="empresa">Nombre de la empresa / establecimiento</label>
+        <input type="text" id="empresa" name="empresa" required>
+        <div class="error-msg" data-error-for="empresa">Ingresá el nombre de tu empresa.</div>
+
+        <label class="field-label" for="rubro">Rubro principal</label>
+        <select id="rubro" name="rubro" required>
+          <option value="">Seleccioná una opción</option>
+          <option value="Hotelería / Turismo">Hotelería / Turismo</option>
+          <option value="Comercio">Comercio</option>
+          <option value="Industria manufacturera">Industria manufacturera</option>
+          <option value="Agroindustria (molienda, secado, frigorífico)">Agroindustria (molienda, secado, frigorífico)</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <div class="error-msg" data-error-for="rubro">Seleccioná tu rubro.</div>
+
+        <label class="field-label" for="provincia">Provincia</label>
+        <select id="provincia" name="provincia" required>
+          <option value="">Seleccioná una opción</option>
+          <option value="Entre Ríos">Entre Ríos</option>
+          <option value="Corrientes">Corrientes</option>
+          <option value="Santa Fe">Santa Fe</option>
+          <option value="Otra">Otra</option>
+        </select>
+        <div class="error-msg" data-error-for="provincia">Seleccioná tu provincia.</div>
+
+        <label class="field-label" for="empleados">Cantidad aproximada de empleados</label>
+        <select id="empleados" name="empleados" required>
+          <option value="">Seleccioná una opción</option>
+          <option value="1-10">1 a 10</option>
+          <option value="11-50">11 a 50</option>
+          <option value="51-200">51 a 200</option>
+          <option value="+200">Más de 200</option>
+        </select>
+        <div class="error-msg" data-error-for="empleados">Seleccioná una opción.</div>
+
+        <div class="nav-buttons">
+          <button type="button" class="btn-secondary" data-prev>Atrás</button>
+          <button type="button" class="btn-primary" data-next>Continuar</button>
+        </div>
+      </section>
+
+      <!-- PASO 2: Seguridad eléctrica -->
+      <section class="step hidden" data-step="2">
+        <div class="step-label">Paso 2 de 4 · Seguridad eléctrica (Res. SRT 900/15)</div>
+        <h2>Instalaciones y cumplimiento normativo</h2>
+
+        <fieldset data-q="b1">
+          <legend>¿Contás con medición de puesta a tierra realizada en los últimos 12 meses, con protocolo firmado por profesional matriculado?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="b1" id="b1_si" value="Sí" required><label for="b1_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="b1" id="b1_no" value="No"><label for="b1_no">No</label></div>
+            <div class="opt"><input type="radio" name="b1" id="b1_ns" value="No sé"><label for="b1_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="b2">
+          <legend>¿Los tableros eléctricos principales tienen protección diferencial (disyuntor) verificada y en buen estado?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="b2" id="b2_si" value="Sí" required><label for="b2_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="b2" id="b2_no" value="No"><label for="b2_no">No</label></div>
+            <div class="opt"><input type="radio" name="b2" id="b2_ns" value="No sé"><label for="b2_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="b3">
+          <legend>¿Poseés el Legajo Técnico de instalaciones eléctricas actualizado según Res. SRT 900/15?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="b3" id="b3_si" value="Sí" required><label for="b3_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="b3" id="b3_no" value="No"><label for="b3_no">No</label></div>
+            <div class="opt"><input type="radio" name="b3" id="b3_ns" value="No sé"><label for="b3_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="b4">
+          <legend>¿Los tableros están señalizados, con acceso restringido y libres de obstrucciones?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="b4" id="b4_si" value="Sí" required><label for="b4_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="b4" id="b4_no" value="No"><label for="b4_no">No</label></div>
+            <div class="opt"><input type="radio" name="b4" id="b4_ns" value="No sé"><label for="b4_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="b5">
+          <legend>¿Tuviste en los últimos 2 años algún incidente eléctrico (cortocircuito, principio de incendio, descarga a personal)?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="b5" id="b5_si" value="Sí" required><label for="b5_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="b5" id="b5_no" value="No"><label for="b5_no">No</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="b6">
+          <legend>¿Realizás mantenimiento preventivo programado (no solo correctivo) de las instalaciones eléctricas?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="b6" id="b6_si" value="Sí" required><label for="b6_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="b6" id="b6_no" value="No"><label for="b6_no">No</label></div>
+            <div class="opt"><input type="radio" name="b6" id="b6_ns" value="No sé"><label for="b6_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <div class="error-msg" data-error-for="step2">Respondé todas las preguntas de esta sección para continuar.</div>
+
+        <div class="nav-buttons">
+          <button type="button" class="btn-secondary" data-prev>Atrás</button>
+          <button type="button" class="btn-primary" data-next>Continuar</button>
+        </div>
+      </section>
+
+      <!-- PASO 3: Eficiencia energética -->
+      <section class="step hidden" data-step="3">
+        <div class="step-label">Paso 3 de 4 · Eficiencia energética</div>
+        <h2>Consumo, tarifa y gestión</h2>
+
+        <fieldset data-q="c1">
+          <legend>¿Conocés tu categoría tarifaria actual?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="c1" id="c1_t1" value="T1 (pequeña demanda)" required><label for="c1_t1">T1</label></div>
+            <div class="opt"><input type="radio" name="c1" id="c1_t2" value="T2 (mediana demanda)"><label for="c1_t2">T2</label></div>
+            <div class="opt"><input type="radio" name="c1" id="c1_t3" value="T3 (gran demanda)"><label for="c1_t3">T3</label></div>
+            <div class="opt"><input type="radio" name="c1" id="c1_ns" value="No sé"><label for="c1_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="c2">
+          <legend>¿Recibís penalizaciones por bajo factor de potencia (energía reactiva) en tu factura?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="c2" id="c2_si" value="Sí, con recargo" required><label for="c2_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="c2" id="c2_no" value="No"><label for="c2_no">No</label></div>
+            <div class="opt"><input type="radio" name="c2" id="c2_ns" value="No sé"><label for="c2_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="c3">
+          <legend>¿Qué porcentaje de tu iluminación es tecnología LED?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="c3" id="c3_0" value="0-25%" required><label for="c3_0">0–25%</label></div>
+            <div class="opt"><input type="radio" name="c3" id="c3_1" value="26-60%"><label for="c3_1">26–60%</label></div>
+            <div class="opt"><input type="radio" name="c3" id="c3_2" value="61-99%"><label for="c3_2">61–99%</label></div>
+            <div class="opt"><input type="radio" name="c3" id="c3_3" value="100%"><label for="c3_3">100%</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="c4">
+          <legend>¿Realizás algún monitoreo de tu consumo eléctrico más allá de la factura mensual?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="c4" id="c4_si" value="Sí, con equipos propios" required><label for="c4_si">Sí, con equipos</label></div>
+            <div class="opt"><input type="radio" name="c4" id="c4_fa" value="Solo reviso la factura"><label for="c4_fa">Solo la factura</label></div>
+            <div class="opt"><input type="radio" name="c4" id="c4_no" value="No realizo seguimiento"><label for="c4_no">No hago seguimiento</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="c5">
+          <legend>¿Tenés equipos de alto consumo (calderas, compresores, HVAC, hornos) funcionando sin control automatizado o fuera de horario sin necesidad?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="c5" id="c5_si" value="Sí" required><label for="c5_si">Sí</label></div>
+            <div class="opt"><input type="radio" name="c5" id="c5_no" value="No"><label for="c5_no">No</label></div>
+            <div class="opt"><input type="radio" name="c5" id="c5_ns" value="No sé"><label for="c5_ns">No sé</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset data-q="c6">
+          <legend>¿Conocés aproximadamente tu gasto mensual en energía eléctrica?</legend>
+          <div class="options">
+            <div class="opt"><input type="radio" name="c6" id="c6_si" value="Lo tengo controlado" required><label for="c6_si">Lo tengo controlado</label></div>
+            <div class="opt"><input type="radio" name="c6" id="c6_ap" value="Tengo una idea aproximada"><label for="c6_ap">Idea aproximada</label></div>
+            <div class="opt"><input type="radio" name="c6" id="c6_no" value="No lo sé"><label for="c6_no">No lo sé</label></div>
+          </div>
+        </fieldset>
+
+        <div class="error-msg" data-error-for="step3">Respondé todas las preguntas de esta sección para continuar.</div>
+
+        <div class="nav-buttons">
+          <button type="button" class="btn-secondary" data-prev>Atrás</button>
+          <button type="button" class="btn-primary" data-next>Continuar</button>
+        </div>
+      </section>
+
+      <!-- PASO 4: Contacto -->
+      <section class="step hidden" data-step="4">
+        <div class="step-label">Paso 4 de 4 · Recibí tu informe</div>
+        <h2>¿A dónde te enviamos el diagnóstico?</h2>
+        <p class="lead">Vas a recibir un informe personalizado en PDF con tu nivel de madurez y recomendaciones concretas.</p>
+
+        <label class="field-label" for="nombre">Nombre y apellido</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <div class="error-msg" data-error-for="nombre">Ingresá tu nombre.</div>
+
+        <label class="field-label" for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+        <div class="error-msg" data-error-for="email">Ingresá un email válido.</div>
+
+        <label class="field-label" for="telefono">WhatsApp / Teléfono</label>
+        <input type="tel" id="telefono" name="telefono" placeholder="Ej: 345 4123456" required>
+        <div class="error-msg" data-error-for="telefono">Ingresá un teléfono de contacto.</div>
+
+        <div class="consent">
+          <input type="checkbox" id="consentimiento" name="consentimiento" required>
+          <label for="consentimiento">
+            Acepto que Gestión Energética utilice estos datos para generar mi diagnóstico
+            y contactarme por medios comerciales relacionados con este servicio. Mis datos
+            no serán cedidos a terceros (Ley 25.326 de Protección de Datos Personales).
+          </label>
+        </div>
+        <div class="error-msg" data-error-for="consentimiento">Necesitamos tu consentimiento para continuar.</div>
+
+        <div class="nav-buttons">
+          <button type="button" class="btn-secondary" data-prev>Atrás</button>
+          <button type="submit" class="btn-primary" id="submitBtn">Recibir mi diagnóstico</button>
+        </div>
+      </section>
+
+      <!-- PASO 5: Confirmación / error -->
+      <section class="step hidden" data-step="5">
+        <div class="center" id="confirmOk">
+          <div class="confirm-icon">✓</div>
+          <h2>¡Listo! Tu diagnóstico está en camino</h2>
+          <p class="lead">
+            En los próximos minutos vas a recibir en tu email un informe personalizado con
+            tu nivel de madurez en seguridad eléctrica y eficiencia energética, y las
+            recomendaciones prioritarias para tu empresa. Revisá también la carpeta de spam.
+          </p>
+        </div>
+        <div class="center hidden" id="confirmErr">
+          <div class="confirm-icon err">!</div>
+          <h2>No pudimos enviar tu diagnóstico</h2>
+          <p class="lead">
+            Hubo un problema de conexión. Volvé a intentarlo en unos minutos o escribinos
+            directamente por WhatsApp y te ayudamos a mano.
+          </p>
+          <button type="button" class="btn-secondary" id="retryBtn">Volver a intentar</button>
+        </div>
+      </section>
+
+    </form>
+
+    <div class="badge-list" id="progressBadges">
+      <span>🔒 Datos protegidos</span>
+      <span>⚡ Basado en Res. SRT 900/15</span>
+      <span>📩 Informe por email</span>
+    </div>
+
+  </div>
+
+  <footer class="foot">
+    Gestión Energética · Ing. Gabriel Santos (MP 41967P) · Concordia, Entre Ríos
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ============================================================
+  // CONFIGURACIÓN — completar con la URL del Web App de Apps Script
+  // una vez desplegado (ver GUIA_DESPLIEGUE.md, paso 3).
+  // ============================================================
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbybEKEAzcatlk8CMg6GuC6oTX48GzB4aKCp3kdJdnDuZ9Tz9AHeZqmI97TN5yW8wIi4/exec";
+
+  const form = document.getElementById("diagForm");
+  const steps = Array.from(document.querySelectorAll(".step"));
+  const progressFill = document.getElementById("progressFill");
+  const submitBtn = document.getElementById("submitBtn");
+  let currentStep = 0;
+
+  const TOTAL_STEPS = steps.length - 1; // el paso de confirmación no cuenta para el progreso
+
+  function showStep(index) {
+    steps.forEach((s) => s.classList.add("hidden"));
+    steps[index].classList.remove("hidden");
+    const pct = Math.min(100, Math.round((index / TOTAL_STEPS) * 100));
+    progressFill.style.width = pct + "%";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function fieldsInStep(stepEl) {
+    return Array.from(stepEl.querySelectorAll("input, select"));
+  }
+
+  function validateStep(stepEl) {
+    let valid = true;
+    const groups = {};
+
+    fieldsInStep(stepEl).forEach((el) => {
+      if (el.type === "radio") {
+        groups[el.name] = groups[el.name] || [];
+        groups[el.name].push(el);
+      }
+    });
+
+    // Validar radios agrupados (una respuesta por pregunta)
+    Object.keys(groups).forEach((name) => {
+      const checked = groups[name].some((r) => r.checked);
+      if (!checked) valid = false;
+    });
+    const stepErr = stepEl.querySelector('[data-error-for="step' + stepEl.dataset.step + '"]');
+    if (stepErr) stepErr.style.display = Object.keys(groups).length && !valid ? "block" : "none";
+
+    // Validar inputs de texto/email/tel/select individuales
+    fieldsInStep(stepEl).forEach((el) => {
+      if (el.type === "radio" || el.type === "checkbox") return;
+      const errEl = stepEl.querySelector('[data-error-for="' + el.name + '"]');
+      if (el.hasAttribute("required") && !el.value.trim()) {
+        valid = false;
+        if (errEl) errEl.style.display = "block";
+      } else if (el.type === "email" && el.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value)) {
+        valid = false;
+        if (errEl) errEl.style.display = "block";
+      } else if (errEl) {
+        errEl.style.display = "none";
+      }
+    });
+
+    // Validar checkbox de consentimiento
+    const consent = stepEl.querySelector("#consentimiento");
+    if (consent) {
+      const errEl = stepEl.querySelector('[data-error-for="consentimiento"]');
+      if (!consent.checked) {
+        valid = false;
+        if (errEl) errEl.style.display = "block";
+      } else if (errEl) {
+        errEl.style.display = "none";
+      }
+    }
+
+    return valid;
+  }
+
+  document.querySelectorAll("[data-next]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const stepEl = steps[currentStep];
+      if (stepEl.dataset.step !== "0" && !validateStep(stepEl)) return;
+      currentStep++;
+      showStep(currentStep);
+    });
+  });
+
+  document.querySelectorAll("[data-prev]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentStep--;
+      showStep(currentStep);
+    });
+  });
+
+  function collectPayload() {
+    const data = {};
+    new FormData(form).forEach((value, key) => {
+      data[key] = value;
+    });
+    data.consentimiento = document.getElementById("consentimiento").checked ? "Sí" : "No";
+    data.origen = "web-autodiagnostico";
+    data.fecha_envio = new Date().toISOString();
+    return data;
+  }
+
+  async function submitDiagnostico(payload) {
+    // Los Web Apps de Apps Script no responden preflight CORS (OPTIONS),
+    // por eso se usa modo 'no-cors' con Content-Type text/plain: evita el
+    // preflight y el navegador no exige leer la respuesta. La confirmación
+    // visual se basa en que el POST no arroje error de red; la verdad de
+    // fondo (fila cargada + email enviado) se confirma revisando la planilla.
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+    });
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const stepEl = steps[currentStep];
+    if (!validateStep(stepEl)) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Enviando...";
+
+    const payload = collectPayload();
+
+    try {
+      if (APPS_SCRIPT_URL.indexOf("PEGAR_ACA") === 0) {
+        throw new Error("APPS_SCRIPT_URL sin configurar");
+      }
+      await submitDiagnostico(payload);
+      currentStep = steps.length - 1;
+      showStep(currentStep);
+      document.getElementById("confirmOk").classList.remove("hidden");
+      document.getElementById("confirmErr").classList.add("hidden");
+    } catch (err) {
+      currentStep = steps.length - 1;
+      showStep(currentStep);
+      document.getElementById("confirmOk").classList.add("hidden");
+      document.getElementById("confirmErr").classList.remove("hidden");
+      console.error("Error al enviar el autodiagnóstico:", err);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Recibir mi diagnóstico";
+    }
+  });
+
+  document.getElementById("retryBtn").addEventListener("click", () => {
+    currentStep = 4;
+    showStep(currentStep);
+  });
+
+  showStep(0);
+})();
+</script>
+
+</body>
+</html>
