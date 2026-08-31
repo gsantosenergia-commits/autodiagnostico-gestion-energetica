@@ -672,17 +672,66 @@
     return data;
   }
 
-  async function submitDiagnostico(payload) {
-    // Los Web Apps de Apps Script no responden preflight CORS (OPTIONS),
-    // por eso se usa modo 'no-cors' con Content-Type text/plain: evita el
-    // preflight y el navegador no exige leer la respuesta. La confirmación
-    // visual se basa en que el POST no arroje error de red; la verdad de
-    // fondo (fila cargada + email enviado) se confirma revisando la planilla.
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
+  function submitDiagnostico(payload) {
+    // Envío vía formulario HTML + iframe oculto en vez de fetch().
+    //
+    // Por qué: fetch() con mode "no-cors" (el método anterior) hace que
+    // el navegador SIEMPRE resuelva la promesa como éxito, sin importar
+    // si el pedido realmente llegó al servidor — y algunos navegadores
+    // embebidos restrictivos (ej. el navegador interno de Instagram)
+    // bloquean en silencio los fetch() de JavaScript hacia dominios de
+    // terceros como script.google.com. Resultado: la página mostraba
+    // "¡Listo!" aunque el dato nunca se guardara.
+    //
+    // Un POST de formulario real (sin JavaScript de por medio para el
+    // envío en sí) es una navegación de navegador estándar, mucho más
+    // compatible con esos entornos restrictivos. Además, acá sí podemos
+    // detectar un fallo de red real: si el iframe no dispara "load" en
+    // un tiempo razonable, asumimos que el envío no llegó.
+    return new Promise((resolve, reject) => {
+      const IFRAME_ID = "diagSubmitFrame";
+      let iframe = document.getElementById(IFRAME_ID);
+      if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.id = IFRAME_ID;
+        iframe.name = IFRAME_ID;
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+      }
+
+      const tempForm = document.createElement("form");
+      tempForm.method = "POST";
+      tempForm.action = APPS_SCRIPT_URL;
+      tempForm.target = IFRAME_ID;
+      tempForm.style.display = "none";
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "payload";
+      input.value = JSON.stringify(payload);
+      tempForm.appendChild(input);
+      document.body.appendChild(tempForm);
+
+      let settled = false;
+      const TIMEOUT_MS = 10000;
+
+      const finish = (ok, err) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        iframe.removeEventListener("load", onLoad);
+        tempForm.remove();
+        if (ok) resolve();
+        else reject(err || new Error("No se pudo confirmar el envío"));
+      };
+
+      const onLoad = () => finish(true);
+      const timer = setTimeout(() => {
+        finish(false, new Error("Tiempo de espera agotado al enviar el diagnóstico"));
+      }, TIMEOUT_MS);
+
+      iframe.addEventListener("load", onLoad);
+      tempForm.submit();
     });
   }
 
